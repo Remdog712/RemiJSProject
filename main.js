@@ -1,5 +1,4 @@
-// Imports at the top
-import './style.css';
+
 import * as THREE from 'https://cdn.skypack.dev/three@0.128.0/build/three.module.js';
 import { OrbitControls } from 'https://cdn.skypack.dev/three@0.128.0/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.128.0/examples/jsm/loaders/GLTFLoader.js';
@@ -29,7 +28,7 @@ renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 // background image s
-const spaceTexture = new THREE.TextureLoader().load('images/wavybackground.jpg');
+const spaceTexture = new THREE.TextureLoader().load('./images/wavybackground.jpg');
 scene.background = spaceTexture;
 
 // add cubes
@@ -47,7 +46,7 @@ icoMesh.position.set(15, 0, -15);
 scene.add(icoMesh);
 
 // Put images on objects
-const smileTexture = new THREE.TextureLoader().load('images/orange_peel.jpg');
+const smileTexture = new THREE.TextureLoader().load('./images/orange_peel.jpg');
 const sphereGeometry = new THREE.SphereGeometry(10, 22, 10);
 const smileMaterial = new THREE.MeshBasicMaterial({ map: smileTexture });
 const smileMesh = new THREE.Mesh(sphereGeometry, smileMaterial);
@@ -55,7 +54,7 @@ smileMesh.position.set(0, -10, -30);
 scene.add(smileMesh);
 
 // put the water texture onto the object
-const normalTexture = new THREE.TextureLoader().load('images/normals/test_Normal.jpg');
+const normalTexture = new THREE.TextureLoader().load('./images/normals/test_Normal.jpg');
 const torusGeo = new THREE.TorusKnotGeometry(5, 1, 250, 5, 9, 15);
 const torusMaterial = new THREE.MeshStandardMaterial({
   normalMap: normalTexture,
