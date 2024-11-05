@@ -1,102 +1,103 @@
-
 import * as THREE from 'https://cdn.skypack.dev/three@0.128.0/build/three.module.js';
 import { OrbitControls } from 'https://cdn.skypack.dev/three@0.128.0/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.128.0/examples/jsm/loaders/GLTFLoader.js';
-//import './style.css';
-/*import javascriptLogo from './javascript.svg'
-// import viteLogo from 'public.vite.svg'*/
-// Setup
+import { FBXLoader } from 'https://cdn.skypack.dev/three@0.128.0/examples/jsm/loaders/FBXLoader.js';
 
+// Setup Scene and Camera
 const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 20, 50);
 
-const camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
-camera.position.setZ(50);
-camera.position.setX(-3);
-
-const renderer = new THREE.WebGLRenderer({
-  canvas: document.querySelector('#bg'), 
-});
+// Renderer
+const renderer = new THREE.WebGLRenderer({ canvas: document.querySelector('#bg') });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-// background image s
-const spaceTexture = new THREE.TextureLoader().load('./images/wavybackground.jpg');
-scene.background = spaceTexture;
-
-// add cubes
-const geometry = new THREE.BoxGeometry(10, 10, 10);
-const material = new THREE.MeshStandardMaterial({ color: 0xFF6347 });
-const cube = new THREE.Mesh(geometry, material);
-cube.position.set(-15, 0, -15);
-scene.add(cube);
-
-// add in the icosphere
-const ico = new THREE.IcosahedronGeometry(10);
-const icoMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
-const icoMesh = new THREE.Mesh(ico, icoMaterial);
-icoMesh.position.set(15, 0, -15);
-scene.add(icoMesh);
-
-// Put images on objects
-const smileTexture = new THREE.TextureLoader().load('./images/orange_peel.jpg');
-const sphereGeometry = new THREE.SphereGeometry(10, 22, 10);
-const smileMaterial = new THREE.MeshBasicMaterial({ map: smileTexture });
-const smileMesh = new THREE.Mesh(sphereGeometry, smileMaterial);
-smileMesh.position.set(0, -10, -30);
-scene.add(smileMesh);
-
-// put the water texture onto the object
-const normalTexture = new THREE.TextureLoader().load('./images/normals/test_Normal.jpg');
-const torusGeo = new THREE.TorusKnotGeometry(5, 1, 250, 5, 9, 15);
-const torusMaterial = new THREE.MeshStandardMaterial({
-  normalMap: normalTexture,
-  roughness: 0,
-  metalness: 0.8
-});
-const torusKnot = new THREE.Mesh(torusGeo, torusMaterial);
-torusKnot.position.y = 20;
-scene.add(torusKnot);
-
-// lights into scene
-const pointLight = new THREE.PointLight(0xffffff);
-pointLight.position.set(0, -10, 10);
-const ambientLight = new THREE.AmbientLight(0xffffff);
-scene.add(pointLight);
-scene.add(ambientLight);
-
-// Adds the helpers for the scene
-const lightHelper = new THREE.PointLightHelper(pointLight);
-scene.add(lightHelper);
-
-const gridHelper = new THREE.GridHelper(200, 50);
-scene.add(gridHelper);
-
-// Does the orbit control
+// Controls
 const controls = new OrbitControls(camera, renderer.domElement);
 
-// Rendering the scene stuff
+// Background Image
+const textureLoader = new THREE.TextureLoader();
+const backgroundTexture = textureLoader.load('./images/background.jpg'); // Path to your background image
+scene.background = backgroundTexture;
+
+// Lights
+const ambientLight = new THREE.AmbientLight(0x404040, 2);
+scene.add(ambientLight);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(50, 50, 50);
+scene.add(directionalLight);
+
+// Floor with Texture
+const floorTexture = textureLoader.load('./images/floor_texture.jpg'); // Path to your floor texture
+floorTexture.wrapS = THREE.RepeatWrapping;
+floorTexture.wrapT = THREE.RepeatWrapping;
+floorTexture.repeat.set(10, 10); // Repeat the texture to make it tile
+
+const floorGeometry = new THREE.PlaneGeometry(500, 500);
+const floorMaterial = new THREE.MeshStandardMaterial({ map: floorTexture });
+const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+floor.rotation.x = -Math.PI / 2;
+floor.position.y = -0.5; // Slightly lower the floor
+scene.add(floor);
+
+// Load Textures for PBR Material
+const albedoTexture = textureLoader.load('./images/orange/Orange_Base_BaseColor.png');
+const displacementTexture = textureLoader.load('./images/orange/Orange_Base_Displacement.png');
+const emissionTexture = textureLoader.load('./images/orange/Orange_Base_Emission.png');
+const metallicTexture = textureLoader.load('./images/orange/Orange_Base_Metallic.png');
+const normalTexture = textureLoader.load('./images/orange/Orange_Base_Normal.png');
+const roughnessTexture = textureLoader.load('./images/orange/Orange_Base_Roughness.png');
+const alphaTexture = textureLoader.load('./images/orange/Orange_Base_Alpha.png');
+
+// FBX Model Loader
+let rotationSpeed = 0.01;
+const loader = new FBXLoader();
+loader.load('./images/orange/orange.fbx', (fbx) => {
+  fbx.scale.set(0.1, 0.1, 0.1);
+  fbx.position.set(0, 15, 0); // Raise the model on the Y-axis
+
+  // Apply PBR Material with textures
+  fbx.traverse((child) => {
+    if (child.isMesh) {
+      child.material = new THREE.MeshStandardMaterial({
+        map: albedoTexture,
+        displacementMap: displacementTexture,
+        displacementScale: 0.1,
+        emissiveMap: emissionTexture,
+        emissiveIntensity: 1.0,
+        metalnessMap: metallicTexture,
+        normalMap: normalTexture,
+        roughnessMap: roughnessTexture,
+        aoMap: alphaTexture,
+        transparent: true,
+        side: THREE.DoubleSide,
+      });
+    }
+  });
+
+  scene.add(fbx);
+
+  // Toggle rotation direction on click
+  document.addEventListener('click', () => {
+    rotationSpeed = -rotationSpeed;
+  });
+
+  // Animation function to rotate the model
+  function rotateModel() {
+    fbx.rotation.y += rotationSpeed;
+    requestAnimationFrame(rotateModel);
+  }
+  rotateModel();
+}, undefined, (error) => {
+  console.error('Error loading FBX model:', error);
+});
+
+// Animation Loop
 function animate() {
   requestAnimationFrame(animate);
-
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
-
-  icoMesh.rotation.z -= 0.03;
-  icoMesh.rotation.y -= 0.03;
-
-  smileMesh.rotation.y += 0.05;
-
-  torusKnot.rotation.x += 0.02;
-
   controls.update();
-
   renderer.render(scene, camera);
 }
 
 animate();
-
