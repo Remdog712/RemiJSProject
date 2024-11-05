@@ -17,7 +17,7 @@ const controls = new OrbitControls(camera, renderer.domElement);
 
 //load the background picture
 const textureLoader = new THREE.TextureLoader();
-const backgroundTexture = textureLoader.load('./images/sky.png');
+const backgroundTexture = textureLoader.load('./images/backgrounds/sky.png');
 scene.background = backgroundTexture;
 
 //lights
@@ -28,7 +28,7 @@ directionalLight.position.set(50, 50, 50);
 scene.add(directionalLight);
 
 //load the ground picture and tile it
-const floorTexture = textureLoader.load('./images/dirt.jpg');
+const floorTexture = textureLoader.load('./images/backgrounds/dirt.jpg');
 floorTexture.wrapS = THREE.RepeatWrapping;
 floorTexture.wrapT = THREE.RepeatWrapping;
 floorTexture.repeat.set(10, 10); 
